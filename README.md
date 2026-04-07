@@ -1,29 +1,27 @@
-# 🚀 TaskFlow – Dockerized CI/CD Application
+# 🚀 TaskFlow – CI/CD Pipeline Implementation
 
-TaskFlow is a simple Node.js REST API containerized using Docker and integrated with a CI/CD pipeline using GitHub Actions.
+## 📌 Overview
+TaskFlow is a project where I implemented a CI/CD pipeline to automate the build and deployment process using GitHub and Docker.
 
-## 🛠 Tech Stack
-- Node.js
-- Express
+## ⚙️ Tech Stack
+- GitHub
 - Docker
-- GitHub Actions (CI/CD)
+- CI/CD Pipeline
 
-## 🐳 Docker Setup
+## 🔧 Features
+- Automated build and deployment
+- Version control using GitHub
+- Containerized application using Docker
 
-Build image:
-docker build -t taskflow .
+## 🚀 How It Works
+1. Code pushed to GitHub
+2. Pipeline triggers automatically
+3. Application builds and deploys using Docker
 
-Run container:
-docker run -p 5002:5000 taskflow
+## 📚 Learning Outcomes
+- Hands-on experience with CI/CD pipelines
+- Understanding of DevOps workflow
+- Automation in software development
 
-Visit:
-http://localhost:5002
-
-## 🔁 CI/CD Pipeline
-
-On every push to main branch:
-- Docker image builds automatically
-- Image pushed to DockerHub
-
-## 📌 Author
-Swati Parihar
+## 🔗 GitHub Repo
+https://github.com/swatiparihar18/taskflow-ci-cd.git
