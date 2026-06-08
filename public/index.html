@@ -1,0 +1,390 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#30363d;
+  --green:#3fb950;--green2:#238636;--blue:#58a6ff;--orange:#f0883e;
+  --red:#f85149;--yellow:#d29922;--purple:#bc8cff;--text:#e6edf3;--text2:#8b949e;
+}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);padding:0;min-height:600px}
+.app{display:grid;grid-template-rows:auto auto 1fr;gap:0;min-height:600px}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+.logo-icon{width:28px;height:28px;background:var(--green2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.status-bar{display:flex;align-items:center;gap:16px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.status-text{font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace}
+.branch-badge{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--blue)}
+.pipeline-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 20px}
+.pipeline-title{font-size:13px;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em}
+.pipeline-stages{display:flex;align-items:center;gap:0}
+.stage{display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:6px;font-size:12px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid transparent;position:relative}
+.stage.done{background:#1a2a1a;border-color:var(--green2);color:var(--green)}
+.stage.running{background:#1a2030;border-color:#1f6feb;color:var(--blue);animation:borderpulse 1.5s infinite}
+@keyframes borderpulse{0%,100%{border-color:#1f6feb}50%{border-color:var(--blue)}}
+.stage.waiting{background:var(--bg3);border-color:var(--border);color:var(--text2)}
+.stage.failed{background:#2a1a1a;border-color:var(--red);color:var(--red)}
+.arrow{color:var(--border);font-size:14px;padding:0 2px}
+.stage-icon{font-size:14px}
+.main{display:grid;grid-template-columns:1fr 340px;gap:0;height:100%}
+.left{padding:20px;display:flex;flex-direction:column;gap:16px}
+.right{border-left:1px solid var(--border);padding:16px;display:flex;flex-direction:column;gap:14px}
+.section-label{font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.metric-value{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1.1}
+.metric-label{font-size:11px;color:var(--text2);margin-top:4px}
+.metric-delta{font-size:11px;margin-top:6px;font-family:'JetBrains Mono',monospace}
+.up{color:var(--green)}.down{color:var(--red)}.neutral{color:var(--yellow)}
+.tasks-container{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;flex:1}
+.tasks-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.tasks-head-title{font-size:13px;font-weight:600}
+.count-badge{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:2px 8px;font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace}
+.task-row{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .15s}
+.task-row:hover{background:var(--bg3)}
+.task-row:last-child{border-bottom:none}
+.task-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;transition:all .15s}
+.task-check.done{background:var(--green2);border-color:var(--green2);color:#fff}
+.task-check.inprogress{background:#1a2030;border-color:var(--blue);color:var(--blue)}
+.task-info{flex:1;min-width:0}
+.task-name{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-name.done-text{color:var(--text2);text-decoration:line-through}
+.task-meta{display:flex;align-items:center;gap:8px;margin-top:3px}
+.tag{font-size:10px;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-weight:500}
+.tag-docker{background:#0d2137;color:#58a6ff;border:1px solid #1a3a5c}
+.tag-k8s{background:#1a1038;color:#bc8cff;border:1px solid #3a2a6c}
+.tag-ci{background:#0d2810;color:#3fb950;border:1px solid #1a4a20}
+.tag-sec{background:#2a1a08;color:#f0883e;border:1px solid #5c3a1a}
+.tag-iac{background:#1a2a2a;color:#79c0ff;border:1px solid #1a3a4a}
+.task-time{font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.priority-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.p-high{background:var(--red)}.p-med{background:var(--yellow)}.p-low{background:var(--green)}
+.logs-panel{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);height:160px;overflow-y:auto}
+.log-line{margin-bottom:4px;line-height:1.5}
+.log-time{color:var(--border)}.log-ok{color:var(--green)}.log-info{color:var(--blue)}.log-warn{color:var(--yellow)}.log-err{color:var(--red)}
+.infra-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.infra-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.infra-name{font-size:11px;color:var(--text2);margin-bottom:6px;font-family:'JetBrains Mono',monospace}
+.infra-val{font-size:18px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text)}
+.progress-bar{height:3px;background:var(--bg3);border-radius:2px;margin-top:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;transition:width 1s}
+.fill-green{background:var(--green)}.fill-blue{background:var(--blue)}.fill-orange{background:var(--orange)}.fill-red{background:var(--red)}
+.new-task-bar{display:flex;gap:8px;align-items:center}
+.new-task-bar input{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'Sora',sans-serif;font-size:12px;outline:none;transition:border .15s}
+.new-task-bar input:focus{border-color:var(--blue)}
+.new-task-bar input::placeholder{color:var(--text2)}
+.add-btn{background:var(--green2);border:none;border-radius:6px;padding:8px 14px;color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;font-weight:600;transition:background .15s;white-space:nowrap}
+.add-btn:hover{background:#2ea043}
+.commits{display:flex;flex-direction:column;gap:6px}
+.commit-row{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 10px;display:flex;align-items:center;gap:10px}
+.commit-hash{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);background:#0d1b2a;padding:2px 6px;border-radius:4px;flex-shrink:0}
+.commit-msg{font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.commit-who{font-size:11px;color:var(--text2);white-space:nowrap}
+.avatar{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0}
+</style>
+
+<h2 class="sr-only">TaskFlow DevOps Dashboard — CI/CD pipeline, task tracker, infrastructure monitor</h2>
+
+<div class="app">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-icon">TF</div>
+      TaskFlow
+      <span style="color:var(--text2);font-weight:300">/ devops-pipeline</span>
+    </div>
+    <div class="status-bar">
+      <div class="branch-badge">⎇ main</div>
+      <div style="display:flex;align-items:center;gap:6px"><div class="dot"></div><span class="status-text">build #47 running</span></div>
+      <span class="status-text" style="color:var(--text2)" id="clock"></span>
+    </div>
+  </div>
+
+  <div class="pipeline-header">
+    <div class="pipeline-title">CI/CD Pipeline</div>
+    <div class="pipeline-stages">
+      <div class="stage done"><span class="stage-icon">✓</span> Source</div>
+      <div class="arrow">›</div>
+      <div class="stage done"><span class="stage-icon">✓</span> Build</div>
+      <div class="arrow">›</div>
+      <div class="stage done"><span class="stage-icon">✓</span> Test</div>
+      <div class="arrow">›</div>
+      <div class="stage done"><span class="stage-icon">✓</span> Docker</div>
+      <div class="arrow">›</div>
+      <div class="stage running"><span class="stage-icon">⟳</span> Deploy</div>
+      <div class="arrow">›</div>
+      <div class="stage waiting">Monitor</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="left">
+      <div>
+        <div class="section-label">System Overview</div>
+        <div class="metrics">
+          <div class="metric-card">
+            <div class="metric-value" style="color:var(--green)" id="uptime-val">99.9%</div>
+            <div class="metric-label">Uptime</div>
+            <div class="metric-delta up">↑ SLA met</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="color:var(--blue)" id="deploy-val">47</div>
+            <div class="metric-label">Deploys today</div>
+            <div class="metric-delta up">↑ 12 vs yesterday</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="color:var(--orange)" id="build-val">2m 14s</div>
+            <div class="metric-label">Avg build time</div>
+            <div class="metric-delta down">↓ 8s slower</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-value" style="color:var(--purple)" id="coverage-val">87%</div>
+            <div class="metric-label">Test coverage</div>
+            <div class="metric-delta up">↑ 3% this week</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Sprint Tasks</div>
+        <div class="tasks-container">
+          <div class="tasks-head">
+            <span class="tasks-head-title">Active Sprint — Week 23</span>
+            <span class="count-badge" id="task-count">6 tasks</span>
+          </div>
+          <div id="task-list">
+            <div class="task-row" onclick="toggleTask(this)">
+              <div class="priority-dot p-high"></div>
+              <div class="task-check done">✓</div>
+              <div class="task-info">
+                <div class="task-name done-text">Set up GitHub Actions CI workflow</div>
+                <div class="task-meta"><span class="tag tag-ci">ci/cd</span><span style="font-size:11px;color:var(--text2)">closed by #a2f3e1</span></div>
+              </div>
+              <div class="task-time">2h ago</div>
+            </div>
+            <div class="task-row" onclick="toggleTask(this)">
+              <div class="priority-dot p-high"></div>
+              <div class="task-check done">✓</div>
+              <div class="task-info">
+                <div class="task-name done-text">Dockerize Node.js app with multi-stage build</div>
+                <div class="task-meta"><span class="tag tag-docker">docker</span></div>
+              </div>
+              <div class="task-time">4h ago</div>
+            </div>
+            <div class="task-row" onclick="toggleTask(this)">
+              <div class="priority-dot p-high"></div>
+              <div class="task-check inprogress">⟳</div>
+              <div class="task-info">
+                <div class="task-name">Deploy to Kubernetes cluster (EKS)</div>
+                <div class="task-meta"><span class="tag tag-k8s">k8s</span><span style="font-size:11px;color:var(--blue)">in progress</span></div>
+              </div>
+              <div class="task-time">now</div>
+            </div>
+            <div class="task-row" onclick="toggleTask(this)">
+              <div class="priority-dot p-med"></div>
+              <div class="task-check"></div>
+              <div class="task-info">
+                <div class="task-name">Add Terraform IaC for EC2 provisioning</div>
+                <div class="task-meta"><span class="tag tag-iac">terraform</span></div>
+              </div>
+              <div class="task-time">1d left</div>
+            </div>
+            <div class="task-row" onclick="toggleTask(this)">
+              <div class="priority-dot p-med"></div>
+              <div class="task-check"></div>
+              <div class="task-info">
+                <div class="task-name">Configure Prometheus + Grafana monitoring</div>
+                <div class="task-meta"><span class="tag tag-k8s">monitoring</span></div>
+              </div>
+              <div class="task-time">2d left</div>
+            </div>
+            <div class="task-row" onclick="toggleTask(this)">
+              <div class="priority-dot p-low"></div>
+              <div class="task-check"></div>
+              <div class="task-info">
+                <div class="task-name">Implement secrets rotation via Vault</div>
+                <div class="task-meta"><span class="tag tag-sec">security</span></div>
+              </div>
+              <div class="task-time">3d left</div>
+            </div>
+          </div>
+          <div style="padding:10px 16px;border-top:1px solid var(--border)">
+            <div class="new-task-bar">
+              <input type="text" id="new-task-input" placeholder="Add a task... (e.g. Set up ArgoCD)" />
+              <button class="add-btn" onclick="addTask()">+ Add</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right">
+      <div>
+        <div class="section-label">Infrastructure</div>
+        <div class="infra-grid">
+          <div class="infra-card">
+            <div class="infra-name">CPU Usage</div>
+            <div class="infra-val" id="cpu-val">34%</div>
+            <div class="progress-bar"><div class="progress-fill fill-green" id="cpu-bar" style="width:34%"></div></div>
+          </div>
+          <div class="infra-card">
+            <div class="infra-name">Memory</div>
+            <div class="infra-val" id="mem-val">61%</div>
+            <div class="progress-bar"><div class="progress-fill fill-blue" id="mem-bar" style="width:61%"></div></div>
+          </div>
+          <div class="infra-card">
+            <div class="infra-name">Disk I/O</div>
+            <div class="infra-val" id="disk-val">22%</div>
+            <div class="progress-bar"><div class="progress-fill fill-orange" id="disk-bar" style="width:22%"></div></div>
+          </div>
+          <div class="infra-card">
+            <div class="infra-name">Network</div>
+            <div class="infra-val" id="net-val">45%</div>
+            <div class="progress-bar"><div class="progress-fill fill-blue" id="net-bar" style="width:45%"></div></div>
+          </div>
+        </div>
+        <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace">3 pods running · 0 crashes</span>
+          <span style="font-size:11px;color:var(--green);font-family:'JetBrains Mono',monospace">● healthy</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Live Build Logs</div>
+        <div class="logs-panel" id="log-panel">
+          <div class="log-line"><span class="log-time">[10:42:01]</span> <span class="log-ok">✓</span> Source checkout complete</div>
+          <div class="log-line"><span class="log-time">[10:42:03]</span> <span class="log-info">→</span> npm install (cache hit)</div>
+          <div class="log-line"><span class="log-time">[10:42:15]</span> <span class="log-ok">✓</span> Build successful (23s)</div>
+          <div class="log-line"><span class="log-time">[10:42:16]</span> <span class="log-info">→</span> Running test suite...</div>
+          <div class="log-line"><span class="log-time">[10:42:38]</span> <span class="log-ok">✓</span> 142 tests passed, 0 failed</div>
+          <div class="log-line"><span class="log-time">[10:42:40]</span> <span class="log-info">→</span> docker build -t taskflow:47</div>
+          <div class="log-line"><span class="log-time">[10:43:01]</span> <span class="log-ok">✓</span> Image pushed to ECR</div>
+          <div class="log-line"><span class="log-time">[10:43:03]</span> <span class="log-info">→</span> kubectl apply -f k8s/deployment.yml</div>
+          <div class="log-line" id="live-log"><span class="log-time">[10:43:11]</span> <span class="log-warn">⟳</span> Waiting for rollout...</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Recent Commits</div>
+        <div class="commits">
+          <div class="commit-row">
+            <div class="avatar" style="background:#1a2a3a;color:var(--blue)">YO</div>
+            <div class="commit-hash">a2f3e1</div>
+            <div class="commit-msg">feat: add healthcheck endpoint</div>
+          </div>
+          <div class="commit-row">
+            <div class="avatar" style="background:#1a3a1a;color:var(--green)">YO</div>
+            <div class="commit-hash">b91c22</div>
+            <div class="commit-msg">ci: optimize docker layer caching</div>
+          </div>
+          <div class="commit-row">
+            <div class="avatar" style="background:#2a1a1a;color:var(--orange)">YO</div>
+            <div class="commit-hash">f03d87</div>
+            <div class="commit-msg">fix: env vars from Secrets Manager</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function pad(n){return String(n).padStart(2,'0')}
+function updateClock(){
+  const now=new Date();
+  document.getElementById('clock').textContent=pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds())+' UTC';
+}
+updateClock();setInterval(updateClock,1000);
+
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function updateInfra(){
+  const metrics=[
+    {id:'cpu',barId:'cpu-bar',min:20,max:55,fill:'fill-green',suffix:'%'},
+    {id:'mem',barId:'mem-bar',min:50,max:75,fill:'fill-blue',suffix:'%'},
+    {id:'disk',barId:'disk-bar',min:10,max:40,fill:'fill-orange',suffix:'%'},
+    {id:'net',barId:'net-bar',min:30,max:70,fill:'fill-blue',suffix:'%'},
+  ];
+  metrics.forEach(m=>{
+    const v=rand(m.min,m.max);
+    const valEl=document.getElementById(m.id+'-val');
+    const barEl=document.getElementById(m.barId);
+    if(valEl)valEl.textContent=v+m.suffix;
+    if(barEl){
+      barEl.style.width=v+'%';
+      barEl.className='progress-fill '+m.fill;
+      if(v>70){barEl.className='progress-fill fill-red';}
+    }
+  });
+}
+setInterval(updateInfra,3000);
+
+const logMessages=[
+  ['log-ok','✓','Rolling update: pod 1/3 ready'],
+  ['log-info','→','Health probe: GET /health → 200 OK'],
+  ['log-ok','✓','Rolling update: pod 2/3 ready'],
+  ['log-info','→','Scaling replica set to 3'],
+  ['log-ok','✓','Deployment taskflow-47 complete'],
+  ['log-ok','✓','Service endpoint active · 0ms cold start'],
+];
+let logIdx=0;
+function appendLog(){
+  if(logIdx>=logMessages.length)return;
+  const[cls,icon,msg]=logMessages[logIdx++];
+  const now=new Date();
+  const timeStr='['+pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds())+']';
+  const panel=document.getElementById('log-panel');
+  const div=document.createElement('div');
+  div.className='log-line';
+  div.innerHTML='<span class="log-time">'+timeStr+'</span> <span class="'+cls+'">'+icon+'</span> '+msg;
+  panel.appendChild(div);
+  panel.scrollTop=panel.scrollHeight;
+}
+setInterval(appendLog,2500);
+
+function toggleTask(row){
+  const check=row.querySelector('.task-check');
+  const name=row.querySelector('.task-name');
+  if(check.classList.contains('inprogress'))return;
+  if(check.classList.contains('done')){
+    check.classList.remove('done');check.textContent='';
+    name.classList.remove('done-text');
+  } else {
+    check.classList.add('done');check.textContent='✓';
+    name.classList.add('done-text');
+  }
+  updateTaskCount();
+}
+
+function updateTaskCount(){
+  const rows=document.querySelectorAll('.task-row');
+  const done=document.querySelectorAll('.task-check.done').length;
+  document.getElementById('task-count').textContent=rows.length+' tasks · '+done+' done';
+}
+
+const tagMap={docker:'docker',k8s:'k8s',terraform:'iac',monitor:'k8s',ci:'ci',secret:'sec',vault:'sec',aws:'iac',nginx:'docker'};
+function getTag(text){
+  const lower=text.toLowerCase();
+  for(const[k,v] of Object.entries(tagMap)){if(lower.includes(k))return v;}
+  return 'ci';
+}
+const tagLabels={docker:'docker',k8s:'k8s',iac:'terraform',ci:'ci/cd',sec:'security'};
+
+function addTask(){
+  const input=document.getElementById('new-task-input');
+  const val=input.value.trim();
+  if(!val)return;
+  const list=document.getElementById('task-list');
+  const tag=getTag(val);
+  const row=document.createElement('div');
+  row.className='task-row';
+  row.onclick=function(){toggleTask(this)};
+  row.innerHTML=`<div class="priority-dot p-med"></div><div class="task-check"></div><div class="task-info"><div class="task-name">${val}</div><div class="task-meta"><span class="tag tag-${tag}">${tagLabels[tag]||tag}</span></div></div><div class="task-time">now</div>`;
+  const addBar=list.nextElementSibling;
+  list.parentNode.insertBefore(row,addBar);
+  input.value='';
+  updateTaskCount();
+}
+document.getElementById('new-task-input').addEventListener('keydown',e=>{if(e.key==='Enter')addTask()});
+updateTaskCount();
+</script>
